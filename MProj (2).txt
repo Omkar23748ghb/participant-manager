@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Farewell Participants Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .participant-list {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>College Farewell Participants Management System</h1>
+
+<div>
+    <h2>Add Participants</h2>
+    <form id="addParticipantForm">
+        <input type="number" id="participantCount" placeholder="Enter number of participants" required min="1" max="100">
+        <button type="button" onclick="showParticipantInputs()">Set Participant Count</button>
+    </form>
+    
+    <div id="participantInputs"></div>
+    <button type="button" onclick="addParticipants()">Add Participants</button>
+</div>
+
+<div class="participant-list" id="participantList">
+    <h2>List of Participants</h2>
+    <ul id="participants"></ul>
+</div>
+
+<div>
+    <h2>Delete a Participant</h2>
+    <input type="text" id="deleteName" placeholder="Enter participant's name to delete">
+    <button type="button" onclick="deleteParticipant()">Delete Participant</button>
+</div>
+
+<div>
+    <h2>Update Payment Status</h2>
+    <input type="text" id="updateName" placeholder="Enter participant's name to update">
+    <input type="number" id="updateStatus" placeholder="Enter payment status (1 for Paid, 0 for Not Paid)" min="0" max="1">
+    <button type="button" onclick="updatePaymentStatus()">Update Status</button>
+</div>
+
+<div>
+    <h2>Display Participants by Payment Status</h2>
+    <button type="button" onclick="displayByPaymentStatus(1)">Show Paid Participants</button>
+    <button type="button" onclick="displayByPaymentStatus(0)">Show Not Paid Participants</button>
+</div>
+
+<script>
+    let participants = [];
+
+    function showParticipantInputs() {
+        const count = parseInt(document.getElementById('participantCount').value);
+        const inputsContainer = document.getElementById('participantInputs');
+        inputsContainer.innerHTML = ''; // Clear previous inputs
+
+        for (let i = 0; i < count; i++) {
+            const participantDiv = document.createElement('div');
+            participantDiv.innerHTML = `
+                <h3>Participant ${i + 1}</h3>
+                <input type="text" id="name${i}" placeholder="Enter name for participant ${i + 1}" required>
+                <input type="text" id="phone${i}" placeholder="Enter phone number (10 digits)" required maxlength="10">
+                <input type="number" id="paid${i}" placeholder="Has paid? (1 for Yes, 0 for No)" min="0" max="1" required>
+            `;
+            inputsContainer.appendChild(participantDiv);
+        }
+    }
+
+    function addParticipants() {
+        const count = parseInt(document.getElementById('participantCount').value);
+        
+        for (let i = 0; i < count; i++) {
+            const name = document.getElementById(`name${i}`).value.trim();
+            const phoneNumber = document.getElementById(`phone${i}`).value.trim();
+            const hasPaid = document.getElementById(`paid${i}`).value.trim();
+
+            if (phoneNumber.length === 10 && !isNaN(phoneNumber) && (hasPaid === '0' || hasPaid === '1') && name) {
+                participants.push({ name, phoneNumber, hasPaid: parseInt(hasPaid) });
+                displayParticipants();
+            } else {
+                alert("Invalid input! Please check the details for participant " + (i + 1));
+                return; // Stop adding if there's an error
+            }
+        }
+
+        alert(`${count} participant(s) added successfully.`);
+    }
+
+    function displayParticipants() {
+        const participantsList = document.getElementById('participants');
+        participantsList.innerHTML = '';
+        participants.forEach((participant, index) => {
+            const li = document.createElement('li');
+            li.textContent = `${index + 1}. '${participant.name}' - Phone: ${participant.phoneNumber} - Payment Status: ${participant.hasPaid ? 'Paid' : 'Not Paid'}`;
+            participantsList.appendChild(li);
+        });
+    }
+
+    function deleteParticipant() {
+        const nameToDelete = document.getElementById('deleteName').value.trim();
+        
+        if (!nameToDelete) {
+            alert("Please enter a name to delete.");
+            return;
+        }
+
+        participants = participants.filter(participant => participant.name !== nameToDelete);
+        
+        displayParticipants();
+        alert(`Participant '${nameToDelete}' has been deleted.`);
+    }
+
+    function updatePaymentStatus() {
+        const nameToUpdate = document.getElementById('updateName').value.trim();
+        const newStatus = parseInt(document.getElementById('updateStatus').value);
+        
+        const participant = participants.find(p => p.name === nameToUpdate);
+        
+        if (participant) {
+            participant.hasPaid = newStatus;
+            displayParticipants();
+            alert(`Payment status updated for '${nameToUpdate}'.`);
+        } else {
+            alert(`Participant '${nameToUpdate}' not found.`);
+        }
+    }
+
+    function displayByPaymentStatus(status) {
+        const filteredParticipants = participants.filter(p => p.hasPaid === status);
+        
+        if (filteredParticipants.length > 0) {
+            alert(`List of ${status ? 'Paid' : 'Not Paid'} Participants:\n` + filteredParticipants.map(p => p.name).join('\n'));
+        } else {
+            alert(`No ${status ? 'Paid' : 'Not Paid'} participants found.`);
+        }
+    }
+</script>
+
+</body>
+</html>
